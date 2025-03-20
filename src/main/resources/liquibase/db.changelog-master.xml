@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <!-- Run these scripts in order -->
+    <include file="liquibase/01-create-tables.xml"/>
+    <include file="liquibase/02-add-user-roles.xml"/>
+    <include file="liquibase/03-create-text-tracking.xml"/>
+    <include file="liquibase/04-add-store-id-to-template.xml"/>
+
+</databaseChangeLog>

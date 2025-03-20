@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+    <changeSet id="1" author="me">
+        <!-- Create Organization Table -->
+        <createTable tableName="organization">
+            <column name="id" type="SERIAL" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(255)" />
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="last_modified_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </createTable>
+
+        <!-- Create User Table -->
+        <createTable tableName="user">
+            <column name="id" type="SERIAL" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="first_name" type="VARCHAR(255)"/>
+            <column name="last_name" type="VARCHAR(255)"/>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="last_modified_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </createTable>
+
+        <!-- Create Role Table -->
+        <createTable tableName="role">
+            <column name="id" type="SERIAL" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(100)"/>
+        </createTable>
+
+        <!-- Create User-Organization Table (Many-to-Many) -->
+        <createTable tableName="user_organization">
+            <column name="user_id" type="INT">
+                <constraints foreignKeyName="fk_user_org_user" referencedTableName="user" referencedColumnNames="id" deleteCascade="true"/>
+            </column>
+            <column name="org_id" type="INT">
+                <constraints foreignKeyName="fk_user_org_org" referencedTableName="organization" referencedColumnNames="id" deleteCascade="true"/>
+            </column>
+        </createTable>
+
+        <!-- Create User-Role-Organization Table (Many-to-Many) -->
+        <createTable tableName="user_role">
+            <column name="user_id" type="INT">
+                <constraints foreignKeyName="fk_user_role_user" referencedTableName="user" referencedColumnNames="id" deleteCascade="true"/>
+            </column>
+            <column name="org_id" type="INT">
+                <constraints foreignKeyName="fk_user_role_org" referencedTableName="organization" referencedColumnNames="id" deleteCascade="true"/>
+            </column>
+            <column name="role_id" type="INT">
+                <constraints foreignKeyName="fk_user_role_role" referencedTableName="role" referencedColumnNames="id" deleteCascade="true"/>
+            </column>
+        </createTable>
+        <dropForeignKeyConstraint baseTableName="user_organization"
+                                  constraintName="fk_user_org_user"/>
+
+        <dropForeignKeyConstraint baseTableName="user_organization"
+                                  constraintName="fk_user_org_org"/>
+        <!-- Add Foreign Key Constraints -->
+        <addForeignKeyConstraint constraintName="fk_user_org_user"
+                                 baseTableName="user_organization" baseColumnNames="user_id"
+                                 referencedTableName="user" referencedColumnNames="id"
+                                 onDelete="CASCADE"/>
+
+        <addForeignKeyConstraint constraintName="fk_user_org_org"
+                                 baseTableName="user_organization" baseColumnNames="org_id"
+                                 referencedTableName="organization" referencedColumnNames="id"
+                                 onDelete="CASCADE"/>
+    </changeSet>
+</databaseChangeLog>

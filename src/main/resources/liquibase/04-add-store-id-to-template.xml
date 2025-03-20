@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <!-- Create Store Table -->
+    <changeSet id="2" author="developer">
+        <!-- Assuming store table is created here -->
+    </changeSet>
+
+    <!-- Add store_id to text_message_template -->
+    <changeSet id="3" author="developer">
+        <addColumn tableName="text_message_template">
+            <column name="store_id" type="int"/>
+        </addColumn>
+
+        <!-- Add Foreign Key Constraint -->
+        <addForeignKeyConstraint
+                baseTableName="text_message_template"
+                baseColumnNames="store_id"
+                referencedTableName="store"
+                referencedColumnNames="id"
+                constraintName="fk_template_store"
+                onDelete="CASCADE"/>
+    </changeSet>
+
+</databaseChangeLog>

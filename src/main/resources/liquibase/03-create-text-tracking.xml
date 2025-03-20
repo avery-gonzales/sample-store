@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <!-- Create Store Table -->
+    <changeSet id="2" author="developer">
+        <createTable tableName="store">
+            <column name="id" type="SERIAL">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(255)"/>
+            <column name="lat" type="DECIMAL(9,6)"/>
+            <column name="long" type="DECIMAL(9,6)"/>
+            <column name="org_id" type="INT">
+                <constraints foreignKeyName="fk_store_org" referencedTableName="organization" referencedColumnNames="id" deleteCascade="true"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="last_modified_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </createTable>
+    </changeSet>
+
+    <!-- Create Client Table -->
+    <changeSet id="3" author="developer">
+        <createTable tableName="client">
+            <column name="id" type="SERIAL">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="first_name" type="VARCHAR(255)"/>
+            <column name="last_name" type="VARCHAR(255)"/>
+            <column name="phone_number" type="VARCHAR(20)"/>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </createTable>
+        <addUniqueConstraint constraintName="uq_client_phone"
+                             tableName="client" columnNames="phone_number"/>
+    </changeSet>
+
+    <!-- Create Text Message Template Table (For A/B Testing) -->
+    <changeSet id="4" author="developer">
+        <createTable tableName="text_message_template">
+            <column name="id" type="SERIAL">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="template_name" type="VARCHAR(255)"/>
+            <column name="message_text" type="TEXT"/>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </createTable>
+        <addUniqueConstraint constraintName="uq_template_name"
+                             tableName="text_message_template" columnNames="template_name"/>
+    </changeSet>
+
+    <!-- Create Sent Text Messages Table -->
+    <changeSet id="5" author="developer">
+        <createTable tableName="sent_text_message">
+            <column name="id" type="SERIAL">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="store_id" type="INT">
+                <constraints foreignKeyName="fk_sent_sms_store" referencedTableName="store" referencedColumnNames="id" deleteCascade="true"/>
+            </column>
+            <column name="client_id" type="INT">
+                <constraints foreignKeyName="fk_sent_sms_client" referencedTableName="client" referencedColumnNames="id" deleteCascade="true"/>
+            </column>
+            <column name="template_id" type="INT">
+                <constraints foreignKeyName="fk_sent_sms_template" referencedTableName="text_message_template" referencedColumnNames="id"/>
+            </column>
+            <column name="message_content" type="TEXT"/>
+            <column name="sent_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="tracking_link" type="TEXT"/>
+        </createTable>
+    </changeSet>
+
+    <!-- Create Link Clicks Table (Conversion Tracking) -->
+    <changeSet id="6" author="developer">
+        <createTable tableName="link_click">
+            <column name="id" type="SERIAL">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="sent_text_message_id" type="INT">
+                <constraints foreignKeyName="fk_link_click_sms" referencedTableName="sent_text_message" referencedColumnNames="id" deleteCascade="true"/>
+            </column>
+            <column name="clicked_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>
