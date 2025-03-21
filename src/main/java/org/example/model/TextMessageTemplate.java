@@ -24,7 +24,7 @@ public class TextMessageTemplate {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "template_name", unique = true)
+    @Column(name = "template_name", unique = false)
     private String templateName;
 
     @Column(name = "message_text")
@@ -43,7 +43,7 @@ public class TextMessageTemplate {
     @JsonManagedReference
     @ToString.Exclude
     private Set<SentTextMessage> sentMessages = new HashSet<>();
-    
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
