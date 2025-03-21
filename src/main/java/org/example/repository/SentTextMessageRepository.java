@@ -11,7 +11,10 @@ import java.util.List;
 
 @Repository
 public interface SentTextMessageRepository extends JpaRepository<SentTextMessage, Integer> {
-    List<SentTextMessage> findByStoreId(Integer storeId);
+    List<SentTextMessage> findByStore_Id(Integer storeId);
+    
+    List<SentTextMessage> findByStore_Id(Long storeId);
+    
     List<SentTextMessage> findByClientId(Integer clientId);
     
     @Query("SELECT COUNT(s) FROM SentTextMessage s WHERE s.store.id = :storeId")

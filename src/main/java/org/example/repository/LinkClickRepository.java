@@ -29,4 +29,10 @@ public interface LinkClickRepository extends JpaRepository<LinkClick, Integer> {
     
     @Query("SELECT COUNT(lc) FROM LinkClick lc JOIN lc.sentTextMessage stm WHERE stm.id = :messageId")
     Long countClicksForMessage(@Param("messageId") Integer messageId);
+    
+    @Query("SELECT lc FROM LinkClick lc JOIN lc.sentTextMessage stm WHERE stm.store.id = :storeId")
+    List<LinkClick> findByStoreId(@Param("storeId") Integer storeId);
+    
+    @Query("SELECT lc FROM LinkClick lc JOIN lc.sentTextMessage stm WHERE stm.store.id = :storeId")
+    List<LinkClick> findByStoreId(@Param("storeId") Long storeId);
 } 

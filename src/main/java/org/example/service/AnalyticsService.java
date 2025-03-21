@@ -17,6 +17,15 @@ public class AnalyticsService {
     private final SentTextMessageRepository sentTextMessageRepository;
     private final LinkClickRepository linkClickRepository;
 
+    /**
+     * Get analytics for a store using a Long ID
+     * @param storeId The store ID as a Long
+     * @return Analytics data as a map
+     */
+    public Map<String, Object> getStoreAnalytics(Long storeId) {
+        return getStoreAnalytics(storeId.intValue());
+    }
+
     public Map<String, Object> getStoreAnalytics(Integer storeId) {
         Map<String, Object> analytics = new HashMap<>();
         
@@ -27,7 +36,7 @@ public class AnalyticsService {
         Long totalClicks = linkClickRepository.countClicksByStore(storeId);
         
         // Click-through rate
-        double ctr = totalMessages > 0 ? (double) totalClicks / totalMessages * 100 : 0;
+        double ctr = totalMessages > 0 ? (double) totalClicks / totalMessages : 0;
         
         // Messages by month
         List<Map<String, Object>> messagesByMonth = sentTextMessageRepository.countMessagesByMonth(storeId)
@@ -66,7 +75,7 @@ public class AnalyticsService {
         Map<Integer, Double> ctrByTemplate = new HashMap<>();
         messagesByTemplate.forEach((templateId, messageCount) -> {
             Long clickCount = clicksByTemplate.getOrDefault(templateId, 0L);
-            double templateCtr = messageCount > 0 ? (double) clickCount / messageCount * 100 : 0;
+            double templateCtr = messageCount > 0 ? (double) clickCount / messageCount : 0;
             ctrByTemplate.put(templateId, templateCtr);
         });
         
@@ -80,6 +89,16 @@ public class AnalyticsService {
         analytics.put("ctrByTemplate", ctrByTemplate);
         
         return analytics;
+    }
+    
+    /**
+     * Get recent analytics for a store using a Long ID
+     * @param storeId The store ID as a Long
+     * @param days Number of days to include
+     * @return Recent analytics data as a map
+     */
+    public Map<String, Object> getRecentAnalytics(Long storeId, int days) {
+        return getRecentAnalytics(storeId.intValue(), days);
     }
     
     public Map<String, Object> getRecentAnalytics(Integer storeId, int days) {

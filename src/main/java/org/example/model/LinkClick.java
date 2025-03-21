@@ -23,12 +23,31 @@ public class LinkClick {
 
     @Column(name = "clicked_at")
     private LocalDateTime clickedAt;
+    
+    // Transient field for ease of access, not stored directly in database
+    // Used in CTR predictions
+    @Transient
+    private Integer storeId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sent_text_message_id")
     @JsonBackReference
     @ToString.Exclude
     private SentTextMessage sentTextMessage;
+    
+    /**
+     * Gets the storeId from the associated SentTextMessage
+     * @return the store ID
+     */
+    public Integer getStoreId() {
+        // If the transient field is set, use it
+        if (storeId != null) {
+            return storeId;
+        }
+        // Otherwise get it from the sentTextMessage if available
+        return sentTextMessage != null && sentTextMessage.getStore() != null ? 
+                sentTextMessage.getStore().getId() : null;
+    }
     
     @Override
     public boolean equals(Object o) {

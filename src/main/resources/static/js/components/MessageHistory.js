@@ -1,8 +1,14 @@
 Vue.component('message-history', {
     template: `
         <div class="card">
-            <div class="card-header">
-                Message History
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Message History</span>
+                <div class="btn-group">
+                    <button class="btn btn-sm btn-outline-secondary" :class="{ active: dateRange === '30' }" @click="setDateRange('30')">30 Days</button>
+                    <button class="btn btn-sm btn-outline-secondary" :class="{ active: dateRange === '90' }" @click="setDateRange('90')">90 Days</button>
+                    <button class="btn btn-sm btn-outline-secondary" :class="{ active: dateRange === '180' }" @click="setDateRange('180')">6 Months</button>
+                    <button class="btn btn-sm btn-outline-secondary" :class="{ active: dateRange === 'all' }" @click="setDateRange('all')">All Time</button>
+                </div>
             </div>
             <div class="card-body">
                 <div v-if="isLoading" class="loading">
@@ -36,20 +42,41 @@ Vue.component('message-history', {
         return {
             resizing: false,
             startY: 0,
-            startHeight: 0
+            startHeight: 0,
+            dateRange: '90' // Default to 90 days
         };
     },
     computed: {
         totalMessages() {
-            if (!this.analytics || !this.analytics.messagesByMonth) return 0;
-            return this.analytics.messagesByMonth.reduce((sum, item) => sum + parseInt(item.count), 0);
+            if (!this.analytics || !this.filteredMessagesByMonth) return 0;
+            return this.filteredMessagesByMonth.reduce((sum, item) => sum + parseInt(item.count), 0);
         },
         totalClicks() {
-            if (!this.analytics || !this.analytics.clicksByMonth) return 0;
-            return this.analytics.clicksByMonth.reduce((sum, item) => sum + parseInt(item.count), 0);
+            if (!this.analytics || !this.filteredClicksByMonth) return 0;
+            return this.filteredClicksByMonth.reduce((sum, item) => sum + parseInt(item.count), 0);
+        },
+        filteredMessagesByMonth() {
+            if (!this.analytics || !this.analytics.messagesByMonth) return [];
+            if (this.dateRange === 'all') return this.analytics.messagesByMonth;
+            
+            const cutoffDate = this.getCutoffDate();
+            return this.analytics.messagesByMonth.filter(item => {
+                const itemDate = new Date(parseInt(item.year), parseInt(item.month) - 1, 1);
+                return itemDate >= cutoffDate;
+            });
+        },
+        filteredClicksByMonth() {
+            if (!this.analytics || !this.analytics.clicksByMonth) return [];
+            if (this.dateRange === 'all') return this.analytics.clicksByMonth;
+            
+            const cutoffDate = this.getCutoffDate();
+            return this.analytics.clicksByMonth.filter(item => {
+                const itemDate = new Date(parseInt(item.year), parseInt(item.month) - 1, 1);
+                return itemDate >= cutoffDate;
+            });
         },
         chartData() {
-            if (!this.analytics || !this.analytics.messagesByMonth || !this.analytics.clicksByMonth) {
+            if (!this.analytics || !this.filteredMessagesByMonth.length === 0 || !this.filteredClicksByMonth.length === 0) {
                 return {
                     labels: [],
                     datasets: []
@@ -57,8 +84,8 @@ Vue.component('message-history', {
             }
 
             // Process messages by month data
-            const messagesByMonth = this.analytics.messagesByMonth;
-            const clicksByMonth = this.analytics.clicksByMonth;
+            const messagesByMonth = this.filteredMessagesByMonth;
+            const clicksByMonth = this.filteredClicksByMonth;
             
             // Create a map of all months from both datasets
             const allMonthsMap = new Map();
@@ -93,17 +120,14 @@ Vue.component('message-history', {
             // Sort by date
             const sortedDates = Array.from(allMonthsMap.keys()).sort();
             
-            // Get relevant time range - limit to 12 most recent months if more exist
-            const limitedDates = sortedDates.length > 12 ? sortedDates.slice(-12) : sortedDates;
-            
             // Extract data for chart
-            const labels = limitedDates.map(dateKey => {
+            const labels = sortedDates.map(dateKey => {
                 const [year, month] = dateKey.split('-');
                 return `${this.getMonthName(parseInt(month))} ${year}`;
             });
             
-            const messageData = limitedDates.map(dateKey => allMonthsMap.get(dateKey).messages);
-            const clickData = limitedDates.map(dateKey => allMonthsMap.get(dateKey).clicks);
+            const messageData = sortedDates.map(dateKey => allMonthsMap.get(dateKey).messages);
+            const clickData = sortedDates.map(dateKey => allMonthsMap.get(dateKey).clicks);
             
             return {
                 labels: labels,
@@ -129,6 +153,15 @@ Vue.component('message-history', {
         }
     },
     methods: {
+        setDateRange(range) {
+            this.dateRange = range;
+        },
+        getCutoffDate() {
+            const now = new Date();
+            const days = parseInt(this.dateRange);
+            const cutoffDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - days);
+            return cutoffDate;
+        },
         startResize(e) {
             this.resizing = true;
             this.startY = e.clientY;

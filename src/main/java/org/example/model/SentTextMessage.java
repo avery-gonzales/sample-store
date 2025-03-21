@@ -56,6 +56,23 @@ public class SentTextMessage {
     @ToString.Exclude
     private Set<LinkClick> clicks = new HashSet<>();
     
+    /**
+     * Transient field for storeId, useful for testing
+     */
+    @Transient
+    private Integer storeId;
+    
+    /**
+     * Gets the store ID
+     * @return the ID of the associated store
+     */
+    public Integer getStoreId() {
+        if (storeId != null) {
+            return storeId;
+        }
+        return store != null ? store.getId() : null;
+    }
+    
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

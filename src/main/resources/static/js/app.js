@@ -41,6 +41,23 @@ new Vue({
                     <div class="col-lg-6 col-12 mb-4">
                         <template-performance :analytics="analytics" :is-loading="isLoading"></template-performance>
                     </div>
+                    
+                    <!-- CTR Prediction Section -->
+                    <div class="col-12 mt-2">
+                        <h4 class="mb-3">
+                            <i class="fas fa-brain mr-2"></i>
+                            AI-Powered Insights
+                        </h4>
+                        <div class="row">
+                            <div class="col-12">
+                                <ctr-prediction-chart 
+                                    :store-id="selectedStoreId" 
+                                    :days="predictionDays"
+                                    @update:days="updatePredictionDays">
+                                </ctr-prediction-chart>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
                 <div v-else-if="!isLoading && !error" class="row">
@@ -61,12 +78,15 @@ new Vue({
     data: {
         analytics: null,
         isLoading: false,
-        error: null
+        error: null,
+        selectedStoreId: null,
+        predictionDays: 30
     },
     methods: {
         loadStoreAnalytics(storeId) {
             if (!storeId) return;
             
+            this.selectedStoreId = storeId;
             this.isLoading = true;
             this.analytics = null;
             this.error = null;
@@ -90,6 +110,9 @@ new Vue({
         },
         clearError() {
             this.error = null;
+        },
+        updatePredictionDays(days) {
+            this.predictionDays = days;
         }
     }
 }); 
